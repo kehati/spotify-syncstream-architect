@@ -1,0 +1,38 @@
+services:
+  api:
+    container_name: api
+    restart: always
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    volumes:
+      - ../app:/app/app
+    depends_on:
+      - redis
+    networks:
+      - syncstream-network
+
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      # Named volume for data persistence
+      - redis_data:/data
+    networks:
+      - syncstream-network
+    # Ensures Redis saves data to disk frequently
+    command: redis-server --appendonly yes
+
+networks:
+  syncstream-network:
+    driver: bridge
+
+volumes:
+  redis_data:

@@ -1,0 +1,14 @@
+[project]
+name = "spotify-syncstream-architect"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.128.0",
+    "httpx>=0.28.1",
+    "pydantic-settings>=2.12.0",
+    "redis>=7.1.0",
+    "structlog>=25.5.0",
+    "uvicorn[standard]>=0.40.0",
+]
