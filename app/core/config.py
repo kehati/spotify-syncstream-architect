@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # Spotify Settings
     SPOTIFY_CLIENT_ID: Optional[str] = None
     SPOTIFY_CLIENT_SECRET: Optional[str] = None
-    MOCK_MODE: bool = True
+    SPOTIFY_MOCK_MODE: bool = True
 
     model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
 
