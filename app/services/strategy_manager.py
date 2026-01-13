@@ -28,7 +28,13 @@ class StrategyManager:
     async def get_active_strategy(self) -> StrategyConfig:
         """Get the currently active strategy configuration"""
         client = redis_manager.get_client()
-        return await client.get(self.ACTIVE_STRATEGY_KEY)
+        active_strategy_id = await client.get(self.ACTIVE_STRATEGY_KEY)
+        if not active_strategy_id:
+            raise ValueError("No active strategy configured")
+        strategy = await client.hget(self.STRATEGIES_CATALOG_KEY, active_strategy_id)
+        if not strategy:
+            raise ValueError(f"Active strategy id: '{active_strategy_id}' does not exist")
+        return StrategyConfig.model_validate_json(strategy)
 
     async def upsert_strategy(self, strategy: StrategyConfig):
         """Create or update a strategy configuration"""

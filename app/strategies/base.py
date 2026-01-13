@@ -14,5 +14,5 @@ class PlaybackStrategy(Protocol):
     Any object that can evaluate a track and return an action
     is a valid PlaybackStrategy.
     """
-    def evaluate(self, track: SpotifyTrack) -> StrategyAction:
+    async def evaluate(self, track: SpotifyTrack) -> StrategyAction:
         """This method should evaluate whether a track should be kept or skipped"""

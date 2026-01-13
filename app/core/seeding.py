@@ -33,3 +33,5 @@ async def seed_strategies():
     logger.info("Populating strategies in Redis")
     for strategy in strategies:
         await manager.upsert_strategy(strategy)
+    await manager.set_active_strategy("focus")
+    logger.info("Strategy seeding completed")

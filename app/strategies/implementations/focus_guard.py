@@ -9,11 +9,11 @@ class FocusGuardStrategy:
     Logic: High Instrumentalness and Low Energy = Deep Work
     """
 
-    def __init__(self, instrumental_threshold: int = 0.7, energy_threshold: float = 0.5):
+    def __init__(self, instrumental_threshold: float = 0.7, energy_threshold: float = 0.5):
         self.instrumental_threshold = instrumental_threshold
         self.energy_threshold = energy_threshold
 
-    def evaluate(self, track: SpotifyTrack) -> StrategyAction:
+    async def evaluate(self, track: SpotifyTrack) -> StrategyAction:
         if not track.features:
             logger.warning("FocusGuard: Missing audio features, keeping track by default", track_id=track.id)
             return StrategyAction.KEEP

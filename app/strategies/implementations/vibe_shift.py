@@ -13,7 +13,7 @@ class VibeShiftStrategy:
         self.min_valence = min_valence
         self.max_valence = max_valence
 
-    def evaluate(self, track: SpotifyTrack) -> StrategyAction:
+    async def evaluate(self, track: SpotifyTrack) -> StrategyAction:
         if not track.features:
             return StrategyAction.KEEP
 

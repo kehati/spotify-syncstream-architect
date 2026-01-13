@@ -12,7 +12,7 @@ class EnergyFloorStrategy:
     def __init__(self, energy_floor: float = 0.7):
         self.energy_floor = energy_floor
 
-    def evaluate(self, track: SpotifyTrack) -> StrategyAction:
+    async def evaluate(self, track: SpotifyTrack) -> StrategyAction:
         if not track.features:
             return StrategyAction.KEEP
 

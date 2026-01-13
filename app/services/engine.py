@@ -4,6 +4,7 @@ from app.core.logging import logger
 from app.services.spotify.base import SpotifyService
 from app.services.strategy_manager import StrategyManager
 from app.strategies.base import StrategyAction
+from app.strategies.strategy_factory import StrategyFactory
 
 
 class SyncStreamEngine:
@@ -22,13 +23,16 @@ class SyncStreamEngine:
 
         while not self._stop_event.is_set():
             try:
-                pass
+                await self.apply_strategy()
+                await asyncio.sleep(self.poll_interval)
             except Exception as e:
-                pass
+                logger.error("Engine encountered an error during execution", error=str(e))
+                await asyncio.sleep(self.poll_interval)
+
 
     async def apply_strategy(self):
         """Evaluates the current track against active strategies and takes action."""
-        playback = self.spotify.get_current_playback()
+        playback = await self.spotify.get_current_playback()
         if not playback or not playback.item or not playback.is_playing:
             logger.info("No active playback found or playback is paused")
             return
@@ -41,12 +45,12 @@ class SyncStreamEngine:
             return
 
         if not track.features:
-            track.features = await self.spotify.get_track_audio_features(track.id)
+            track.features = await self.spotify.get_audio_features(track.id)
             if not track.features:
                 logger.warning("Missing audio features, cannot evaluate strategy", track_id=track.id)
                 return
 
-        action = active_strategy.evaluate(track)
+        action = await StrategyFactory.make(active_strategy).evaluate(track)
         if action == StrategyAction.SKIP:
             logger.info("Policy violated, skipping track", track_name=track.name, track_id=track.id, strategy=active_strategy.__class__.__name__)
             await self.spotify.skip_next()
