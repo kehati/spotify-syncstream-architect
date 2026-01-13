@@ -15,7 +15,11 @@ class Settings(BaseSettings):
     # Spotify Settings
     SPOTIFY_CLIENT_ID: Optional[str] = None
     SPOTIFY_CLIENT_SECRET: Optional[str] = None
+    SPOTIFY_REFRESH_TOKEN: Optional[str] = None
     SPOTIFY_MOCK_MODE: bool = True
+
+    # Engine Settings
+    ENGINE_POLL_INTERVAL: int = 5  # in seconds
 
     model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
 

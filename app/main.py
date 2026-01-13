@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api.v1 import strategies, engine
 from app.core.config import settings
 from app.core.logging import setup_logging, logger
 from app.core.redis import redis_manager
@@ -31,7 +32,15 @@ async def lifespan(app: FastAPI):
     if settings.SPOTIFY_MOCK_MODE:
         spotify_service = MockSpotifyService()
     else:
-        spotify_service = ProdSpotifyService()
+        if not all([settings.SPOTIFY_CLIENT_ID, settings.SPOTIFY_CLIENT_SECRET, settings.SPOTIFY_REFRESH_TOKEN]):
+            raise ValueError("Spotify credentials are not properly configured in settings")
+        spotify_service = ProdSpotifyService(
+            client_id=settings.SPOTIFY_CLIENT_ID,
+            client_secret=settings.SPOTIFY_CLIENT_SECRET,
+            refresh_token=settings.SPOTIFY_REFRESH_TOKEN
+        )
+    if not spotify_service:
+        raise RuntimeError("Spotify service initialization failed")
     logger.info("Spotify service initialized", mode="Mock" if settings.SPOTIFY_MOCK_MODE else "PROD")
 
     # Initialize the engine
@@ -41,13 +50,14 @@ async def lifespan(app: FastAPI):
 
     # Run the engine as a non-blocking background task
     engine_task = asyncio.create_task(engine.run())
+    logger.info("Engine initialized successfully")
 
     yield
 
     logger.info("Shutdown sequence initiated")
 
     # Gracefully stop the Engine loop
-    await engine.stop()
+    engine.stop()
     await engine_task
     logger.info("Engine stopped successfully")
 
@@ -56,6 +66,8 @@ async def lifespan(app: FastAPI):
     logger.info("Redis connection pool closed")
 
 app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan, debug=settings.DEBUG)
+app.include_router(strategies.router, prefix="/api")
+app.include_router(engine.router, prefix="/api")
 
 @app.get("/")
 async def root():
