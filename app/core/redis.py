@@ -14,7 +14,7 @@ class RedisManager:
         """Initialize the Connection Pool and the primary client"""
         logger.info("Initializing Redis connection pool", url=str(settings.REDIS_URL))
         try:
-            self.pool = redis.ConnectionPool.from_url(settings.REDIS_URL,
+            self.pool = redis.ConnectionPool.from_url(str(settings.REDIS_URL),
                                                       encoding="utf-8",
                                                       decode_responses=True,
                                                       max_connections=20)
