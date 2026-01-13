@@ -11,8 +11,11 @@ services:
       - ../.env
     volumes:
       - ../app:/app/app
+    environment:
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
-      - redis
+        redis:
+          condition: service_healthy
     networks:
       - syncstream-network
 
@@ -29,6 +32,11 @@ services:
       - syncstream-network
     # Ensures Redis saves data to disk frequently
     command: redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 networks:
   syncstream-network:
