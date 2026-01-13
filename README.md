@@ -1,4 +1,4 @@
-# SyncStream Architect 🎧
+# Spotify SyncStream Architect 🎧
 
 **SyncStream Architect** is a real-time playback supervisor for Spotify. It monitors your active listening session and automatically skips tracks that don't align with your current cognitive or emotional goals. Whether you need a deep-work "Focus Guard" or a minimum "Energy Floor" for a workout, Architect acts as a headless DJ that keeps the vibe consistent without manual intervention.
 
