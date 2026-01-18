@@ -56,7 +56,7 @@ class SpotifyTrack(BaseModel):
     explicit: bool
     popularity: int
     artists: List[SpotifyArtist]
-    album: SpotifyAlbum
+    album: Optional[SpotifyAlbum] = None
     features: Optional[AudioFeatures] = None
 
 class PlaybackState(BaseModel):
