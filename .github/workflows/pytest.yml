@@ -35,6 +35,8 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --frozen
+        env:
+          UV_PYTHON_PREFERENCE: only-managed
 
       - name: Run unit & integration tests
         env:
