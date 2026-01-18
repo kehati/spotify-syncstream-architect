@@ -21,7 +21,7 @@ def mock_strategy_manager():
     return mock_manager
 
 @pytest.fixture
-def mock_engine():
+def mock_engine(mock_strategy_manager):
     """
     Provides a mocked SyncStreamEngine for API tests.
     """
@@ -36,10 +36,12 @@ def mock_engine():
     mock_engine._stop_event.is_set.return_value = False  # Default to "Running"
 
     # 3. Attributes accessed by the router
-    mock_engine.last_evaluation = "2023-10-27T10:00:00"
-    mock_engine.current_track = {"name": "Test Track"}
+    mock_engine.last_evaluation = None
+    mock_engine.current_track = None
 
     # 4. Methods
+    mock_engine.run = AsyncMock(return_value=None)
+    mock_engine.stop = Mock(return_value=None)
     mock_engine.apply_strategy = AsyncMock(return_value=None)
 
     return mock_engine
@@ -50,37 +52,20 @@ async def client(mock_engine, mock_strategy_manager):
     Provides a FastAPI test client with the StrategyManager and SyncStreamEngine mocked.
     """
 
-    # 1. Define a dummy lifespan that does NOTHING
     @asynccontextmanager
     async def noop_lifespan(app: FastAPI):
         yield
 
-    # 2. Save original lifespan to restore later
     original_lifespan = app.router.lifespan_context
-
-    # 3. OVERRIDE: Stop real startup logic
     app.router.lifespan_context = noop_lifespan
-
-    # 4. INJECT STATE DIRECTLY (The Fix 💉)
-    # We force the mock into the state immediately, guaranteeing it exists.
     app.state.engine = mock_engine
-
-    # 5. Patch the StrategyManager instance in the router
-    # (Make sure this path matches your router's import exactly)
     target_object = "app.api.v1.strategies.manager"
 
     with patch(target_object, mock_strategy_manager):
         transport = ASGITransport(app=app)
-
-        # 6. Start the Client
-        # 'async with' triggers the lifespan (our noop_lifespan),
-        # but since we already injected the state, we are safe.
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
             yield ac
 
-    # 7. Cleanup
     app.router.lifespan_context = original_lifespan
     if hasattr(app.state, "engine"):
         del app.state.engine
-
-
