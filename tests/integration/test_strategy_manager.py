@@ -6,7 +6,7 @@ from app.services.strategy_manager import StrategyManager
 # Helper to create dummy strategies
 def create_strategy(id: str, active: bool = True):
     return StrategyConfig(
-        id=f"{id}",
+        id=id,
         name=f"Test {id}",
         description=f"A {id} strategy for testing purposes",
         is_active=active,
